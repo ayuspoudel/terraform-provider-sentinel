@@ -129,7 +129,8 @@ jobs:
             exit 1
           fi
 
-      - name: Create Git tag
+      - name: Create git tag
+        id: tag
         run: |
           VERSION="${{ needs.validate-release.outputs.version }}"
           git tag "$VERSION"
@@ -142,10 +143,21 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Run GoReleaser
+        id: goreleaser
         uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
-          version: v2
+          version: latest
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Roll back git tag on failure
+        if: failure()
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          echo "Rolling back failed release for $VERSION"
+
+          git tag -d "$VERSION" || true
+          git push origin ":refs/tags/$VERSION" || true
+
