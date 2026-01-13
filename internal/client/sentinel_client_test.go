@@ -12,7 +12,7 @@ import (
 func TestSentinelClient_ApplyPolicy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
-			t.Fatalf("expected PUT ")
+			t.Fatalf("expected PUT")
 		}
 		w.WriteHeader(http.StatusOK)
 	}))
