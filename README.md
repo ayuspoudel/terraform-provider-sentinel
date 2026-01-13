@@ -167,7 +167,7 @@ go test ./internal/...
 ```bash
 go build -o terraform-provider-sentinel
 ```
-
+ 
 
 
 ## Versioning
