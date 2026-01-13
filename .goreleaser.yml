@@ -41,11 +41,19 @@ signs:
   - artifacts: checksum
     cmd: gpg
     args:
-      - "--detach-sign"
-      - "--armor"
+      - "--batch"
+      - "--yes"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase"
+      - "{{ .Env.GPG_PASSPHRASE }}"
+      - "--local-user"
+      - "{{ .Env.GPG_KEY_ID }}"
       - "--output"
       - "${signature}"
+      - "--detach-sign"
       - "${artifact}"
+
 
 release:
   github:
