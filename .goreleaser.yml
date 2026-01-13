@@ -19,6 +19,8 @@ builds:
       - amd64
       - arm64
     mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
     ldflags:
       - "-s -w"
 
@@ -33,22 +35,24 @@ archives:
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
 
 signs:
   - artifacts: checksum
     cmd: gpg
     args:
-      - "--batch"
-      - "--yes"
-      - "--armor"
       - "--detach-sign"
+      - "--armor"
+      - "--output"
+      - "${signature}"
+      - "${artifact}"
 
 release:
   github:
     owner: ayuspoudel
     name: terraform-provider-sentinel
   draft: false
-  prerelease: "false"
+  prerelease: auto
 
 changelog:
   disable: true
