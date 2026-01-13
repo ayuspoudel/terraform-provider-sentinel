@@ -36,12 +36,12 @@ checksum:
 
 signs:
   - artifacts: checksum
+    cmd: gpg
     args:
       - "--batch"
       - "--yes"
       - "--armor"
       - "--detach-sign"
-      - "{{ .Artifact }}"
 
 release:
   github:
