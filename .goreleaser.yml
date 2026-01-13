@@ -1,0 +1,54 @@
+version: 2
+
+project_name: terraform-provider-sentinel
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: sentinel
+    main: .
+    binary: terraform-provider-sentinel
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    ldflags:
+      - "-s -w"
+
+archives:
+  - formats:
+      - zip
+    name_template: >
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--yes"
+      - "--armor"
+      - "--detach-sign"
+      - "{{ .Artifact }}"
+
+release:
+  github:
+    owner: ayuspoudel
+    name: terraform-provider-sentinel
+  draft: false
+  prerelease: "false"
+
+changelog:
+  disable: true
