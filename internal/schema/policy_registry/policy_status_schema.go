@@ -1,4 +1,4 @@
-package schema
+package policySchema
 
 import "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 

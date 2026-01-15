@@ -1,4 +1,4 @@
-package models
+package policyModel
 
 import (
 	"github.com/ayuspoudel/sentinel-sre/controlplane/policy/status"

@@ -1,4 +1,4 @@
-package models
+package policyModel
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
