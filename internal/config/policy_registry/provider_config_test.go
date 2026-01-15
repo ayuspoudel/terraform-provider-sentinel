@@ -1,4 +1,4 @@
-package config
+package policyConfig
 
 import (
 	"context"
@@ -14,7 +14,7 @@ func TestProviderConfig_ToClient(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "missing endpoint",
+			name: "missing endpoint ",
 			config: ProviderConfig{
 				Endpoint: types.StringNull(),
 			},
