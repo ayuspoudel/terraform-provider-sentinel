@@ -1,5 +1,5 @@
 # Sentinel Terraform Provider
-
+[![CI, Validation, and Conditional Release](https://github.com/ayuspoudel/terraform-provider-sentinel/actions/workflows/release.yml/badge.svg)](https://github.com/ayuspoudel/terraform-provider-sentinel/actions/workflows/release.yml)
 The **Sentinel Terraform Provider** allows you to manage **Sentinel SRE policies** using Terraform.
 It integrates directly with the Sentinel Control Plane API to apply, update, delete, and observe
 policy definitions as infrastructure-as-code.
