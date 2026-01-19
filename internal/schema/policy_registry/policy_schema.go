@@ -9,10 +9,8 @@ This file defines the Terraform schema for the Sentinel policy resource.
 The schema describes the structure of the resource block as it appears in Terraform
 configuration and validates user input. Nested blocks and attributes defined here
 map directly to the policy model used by the resource implementation.
+These functions will be used in resource/policy_resource.go to define the schema.
 */
-
-type PolicySchemaDef struct {
-}
 
 func MetadataSchema() schema.Block {
 	return schema.SingleNestedBlock{
