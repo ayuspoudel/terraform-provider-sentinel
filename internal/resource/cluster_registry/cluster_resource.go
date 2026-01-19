@@ -75,13 +75,20 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	err := r.client.RegisterWithCredentials(ctx, &plan)
+	apiReq, err := clusterModel.ExpandRegisterRequest(plan)
+	if err != nil {
+		resp.Diagnostics.AddError("invalid sentinel_cluster configuration", err.Error())
+		return
+	}
+	cluster, err := r.client.RegisterWithCredentials(ctx, apiReq)
+
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create sentinel_cluster", err.Error())
 		return
 	}
+	state := clusterModel.FlattenClusterResponse(cluster)
 
-	resp.State.Set(ctx, plan)
+	resp.State.Set(ctx, state)
 }
 
 /*
@@ -109,7 +116,8 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	resp.State.Set(ctx, *cluster)
+	newState := clusterModel.FlattenClusterResponse(cluster)
+	resp.State.Set(ctx, newState)
 }
 
 /*
@@ -126,13 +134,20 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	err := r.client.RegisterCluster(ctx, &plan)
+	apiReq, err := clusterModel.ExpandRegisterRequest(plan)
+	if err != nil {
+		resp.Diagnostics.AddError("invalid sentinel_cluster configuration", err.Error())
+		return
+	}
+
+	cluster, err := r.client.RegisterWithCredentials(ctx, apiReq)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update sentinel_cluster", err.Error())
 		return
 	}
 
-	resp.State.Set(ctx, plan)
+	state := clusterModel.FlattenClusterResponse(cluster)
+	resp.State.Set(ctx, state)
 }
 
 /*
@@ -177,5 +192,6 @@ func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportSt
 		return
 	}
 
-	resp.State.Set(ctx, *cluster)
+	state := clusterModel.FlattenClusterResponse(cluster)
+	resp.State.Set(ctx, state)
 }
