@@ -7,15 +7,32 @@ set -euo pipefail
 
 echo "=== Sentinel Terraform Provider: Local Build Script ==="
 
-echo
 echo "1) Checking for package name consistency..."
-pkg_issues=$(grep -R "^package " internal | awk '{print $2}' | sort | uniq -c | awk '$1 > 1')
-if [ -n "$pkg_issues" ]; then
-  echo "ERROR: Multiple package names detected in same directories:"
-  echo "$pkg_issues"
+
+failed=0
+
+while IFS= read -r dir; do
+  gofiles=$(find "$dir" -maxdepth 1 -type f -name "*.go")
+  [ -z "$gofiles" ] && continue
+
+  pkgs=$(echo "$gofiles" | xargs grep -h "^package " | awk '{print $2}' | sort -u)
+  count=$(echo "$pkgs" | wc -l | tr -d ' ')
+
+  if [ "$count" -gt 1 ]; then
+    echo
+    echo "ERROR: multiple packages detected in $dir"
+    echo "$pkgs"
+    failed=1
+  fi
+done < <(find internal -type d)
+
+if [ "$failed" -eq 1 ]; then
   exit 1
 fi
+
 echo "OK: Package names are consistent."
+
+
 
 echo
 echo "2) Cleaning Go build and module cache..."
@@ -48,7 +65,7 @@ terraform {
   required_providers {
     sentinel = {
       source  = "ayuspoudel/sentinel"
-      version = "0.0.0"
+      version = "0.2.0"
     }
   }
 }
