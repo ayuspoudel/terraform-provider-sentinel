@@ -1,6 +1,9 @@
 package clusterSchema
 
-import "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
 
 func ClusterDataSourceSchema() schema.Schema {
 	return schema.Schema{
@@ -10,7 +13,8 @@ func ClusterDataSourceSchema() schema.Schema {
 			},
 
 			"labels": schema.MapAttribute{
-				Computed: true,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 
 			"source": schema.StringAttribute{
