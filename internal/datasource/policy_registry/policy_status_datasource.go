@@ -10,7 +10,7 @@ import (
 )
 
 type PolicyStatusDataSource struct {
-	client *policyClient.SentinelClient
+	client *policyClient.PolicyClient
 }
 
 func NewPolicyStatusDataSource() datasource.DataSource {
@@ -29,7 +29,7 @@ func (d *PolicyStatusDataSource) Configure(ctx context.Context, req datasource.C
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*policyClient.SentinelClient)
+	d.client = req.ProviderData.(*policyClient.PolicyClient)
 }
 
 func (d *PolicyStatusDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
