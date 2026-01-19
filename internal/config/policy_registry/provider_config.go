@@ -27,7 +27,7 @@ This is the only place where:
 - token is interpreted
 - client creation happens
 */
-func (p *ProviderConfig) ToClient(ctx context.Context) (*policyClient.SentinelClient, error) {
+func (p *ProviderConfig) ToClient(ctx context.Context) (*policyClient.PolicyClient, error) {
 	// Endpoint is required at schema level, but we still guard here
 	if p.Endpoint.IsNull() || p.Endpoint.ValueString() == "" {
 		return nil, fmt.Errorf("sentinel provider: endpoint must be set")
@@ -36,5 +36,5 @@ func (p *ProviderConfig) ToClient(ctx context.Context) (*policyClient.SentinelCl
 	if !p.Token.IsNull() {
 		token = p.Token.ValueString()
 	}
-	return policyClient.NewSentinelClient(p.Endpoint.ValueString(), token), nil
+	return policyClient.NewPolicyClient(p.Endpoint.ValueString(), token), nil
 }
