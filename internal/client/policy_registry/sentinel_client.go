@@ -26,20 +26,20 @@ import (
 	without having to know the details of http about Sentinel Client
 */
 
-type SentinelClient struct {
+type PolicyClient struct {
 	baseURL string
 	token   string
 	http    *http.Client
 }
 
-func NewSentinelClient(baseURL, token string) *SentinelClient {
-	return &SentinelClient{baseURL: baseURL, token: token,
+func NewPolicyClient(baseURL, token string) *PolicyClient {
+	return &PolicyClient{baseURL: baseURL, token: token,
 		http: &http.Client{Timeout: 10 * time.Second},
 	}
 
 }
 
-func (s *SentinelClient) ApplyPolicy(ctx context.Context, name string, policy *spec.PolicySpec) error {
+func (s *PolicyClient) ApplyPolicy(ctx context.Context, name string, policy *spec.PolicySpec) error {
 	body, err := json.Marshal(policy)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (s *SentinelClient) ApplyPolicy(ctx context.Context, name string, policy *s
 	return nil
 }
 
-func (s *SentinelClient) GetPolicy(ctx context.Context, name string) (*spec.PolicySpec, error) {
+func (s *PolicyClient) GetPolicy(ctx context.Context, name string) (*spec.PolicySpec, error) {
 	apiEndpoint := fmt.Sprintf("%s/v1/policies/%s", s.baseURL, name)
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, apiEndpoint, nil)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *SentinelClient) GetPolicy(ctx context.Context, name string) (*spec.Poli
 	return &policy, nil
 
 }
-func (s *SentinelClient) GetPolicyStatus(ctx context.Context, name string) (*status.PolicyStatus, error) {
+func (s *PolicyClient) GetPolicyStatus(ctx context.Context, name string) (*status.PolicyStatus, error) {
 	apiEndpoint := fmt.Sprintf("%s/v1/policies/%s/status", s.baseURL, name)
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, apiEndpoint, nil)
 	if err != nil {
@@ -121,7 +121,7 @@ func (s *SentinelClient) GetPolicyStatus(ctx context.Context, name string) (*sta
 	return &policy, nil
 
 }
-func (s *SentinelClient) DeletePolicy(ctx context.Context, name string) error {
+func (s *PolicyClient) DeletePolicy(ctx context.Context, name string) error {
 	apiEndpoint := fmt.Sprintf("%s/v1/policies/%s", s.baseURL, name)
 	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, apiEndpoint, nil)
 	if err != nil {
@@ -144,7 +144,7 @@ func (s *SentinelClient) DeletePolicy(ctx context.Context, name string) error {
 
 }
 
-func (s *SentinelClient) addHeaders(req *http.Request) {
+func (s *PolicyClient) addHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 
 	if s.token != "" {
