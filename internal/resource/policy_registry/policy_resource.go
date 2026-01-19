@@ -11,7 +11,7 @@ import (
 )
 
 type PolicyResource struct {
-	client *policyClient.SentinelClient
+	client *policyClient.PolicyClient
 }
 
 func NewPolicyResource() resource.Resource {
@@ -31,7 +31,7 @@ func (r *PolicyResource) Configure(ctx context.Context, req resource.ConfigureRe
 	if req.ProviderData == nil {
 		return
 	}
-	r.client = req.ProviderData.(*policyClient.SentinelClient)
+	r.client = req.ProviderData.(*policyClient.PolicyClient)
 }
 
 /*
