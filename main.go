@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	policyProvider "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/provider/policy_registry"
+	sentinelProvider "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/provider"
 	tfprovider "github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
@@ -15,9 +15,11 @@ func main() {
 	err := providerserver.Serve(
 		ctx,
 		func() tfprovider.Provider {
-			return policyProvider.New()
+			return sentinelProvider.New()
 		},
-		providerserver.ServeOpts{Address: "registry.terraform.io/ayuspoudel/sentinel"},
+		providerserver.ServeOpts{
+			Address: "registry.terraform.io/ayuspoudel/sentinel",
+		},
 	)
 
 	if err != nil {
