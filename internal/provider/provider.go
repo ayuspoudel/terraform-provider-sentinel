@@ -52,7 +52,7 @@ func (p *SentinelProvider) Configure(ctx context.Context, req provider.Configure
 
 	policyClient, err := policyCfg.ToClient(ctx)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to configure policy client", err.Error())
+		resp.Diagnostics.AddError(" failed to configure policy client", err.Error())
 		return
 	}
 
