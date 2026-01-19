@@ -18,7 +18,7 @@ func TestSentinelClient_ApplyPolicy(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewSentinelClient(server.URL, "")
+	client := NewPolicyClient(server.URL, "")
 	err := client.ApplyPolicy(context.Background(), "checkout", &spec.PolicySpec{})
 
 	if err != nil {
@@ -32,7 +32,7 @@ func TestSentinelClient_GetPolicy_NotFound(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewSentinelClient(server.URL, "")
+	client := NewPolicyClient(server.URL, "")
 	policy, err := client.GetPolicy(context.Background(), "missing")
 
 	if err != nil {
