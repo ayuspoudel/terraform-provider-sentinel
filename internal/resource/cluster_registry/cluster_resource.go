@@ -8,6 +8,7 @@ import (
 	clusterSchema "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/schema/cluster_registry"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type ClusterResource struct {
@@ -31,7 +32,9 @@ func (r *ClusterResource) Configure(ctx context.Context, req resource.ConfigureR
 	if req.ProviderData == nil {
 		return
 	}
-	r.client = req.ProviderData.(*clusterClient.Client)
+
+	data := req.ProviderData.(map[string]any)
+	r.client = data["cluster"].(*clusterClient.Client)
 }
 
 /*
@@ -86,7 +89,8 @@ func (r *ClusterResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("failed to create sentinel_cluster", err.Error())
 		return
 	}
-	state := clusterModel.FlattenClusterResponse(cluster)
+	state := clusterModel.FlattenClusterResponse(cluster, plan)
+	state.Kubeconfig = plan.Kubeconfig
 
 	resp.State.Set(ctx, state)
 }
@@ -116,8 +120,10 @@ func (r *ClusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	newState := clusterModel.FlattenClusterResponse(cluster)
+	newState := clusterModel.FlattenClusterResponse(cluster, state)
+	newState.Kubeconfig = state.Kubeconfig
 	resp.State.Set(ctx, newState)
+
 }
 
 /*
@@ -146,7 +152,8 @@ func (r *ClusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	state := clusterModel.FlattenClusterResponse(cluster)
+	state := clusterModel.FlattenClusterResponse(cluster, plan)
+	state.Kubeconfig = plan.Kubeconfig
 	resp.State.Set(ctx, state)
 }
 
@@ -173,25 +180,23 @@ func (r *ClusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	resp.State.RemoveResource(ctx)
 }
-
 func (r *ClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	clusterName := req.ID
 	if clusterName == "" {
 		resp.Diagnostics.AddError("invalid import ID", "import ID cannot be empty")
 		return
 	}
-
 	cluster, err := r.client.GetCluster(ctx, clusterName)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get cluster during import", err.Error())
 		return
 	}
-
 	if cluster == nil {
 		resp.Diagnostics.AddError("cluster not found", "no cluster found with the given name")
 		return
 	}
+	plan := clusterModel.ClusterModel{Name: types.StringValue(clusterName), Kubeconfig: types.StringNull()}
 
-	state := clusterModel.FlattenClusterResponse(cluster)
+	state := clusterModel.FlattenClusterResponse(cluster, plan)
 	resp.State.Set(ctx, state)
 }
