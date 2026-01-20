@@ -29,11 +29,13 @@ func (d *ClusterDataSource) Configure(ctx context.Context, req datasource.Config
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*clusterClient.Client)
+
+	data := req.ProviderData.(map[string]any)
+	d.client = data["cluster"].(*clusterClient.Client)
 }
 
 func (d *ClusterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state clusterModel.ClusterModel
+	var state clusterModel.ClusterDataSourceModel
 
 	diags := req.Config.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -52,6 +54,6 @@ func (d *ClusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	newState := clusterModel.FlattenClusterResponse(cluster)
+	newState := clusterModel.FlattenClusterResponseDataSource(cluster)
 	resp.State.Set(ctx, newState)
 }
