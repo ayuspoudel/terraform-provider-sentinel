@@ -29,7 +29,9 @@ func (d *PolicyStatusDataSource) Configure(ctx context.Context, req datasource.C
 	if req.ProviderData == nil {
 		return
 	}
-	d.client = req.ProviderData.(*policyClient.PolicyClient)
+
+	data := req.ProviderData.(map[string]any)
+	d.client = data["policy"].(*policyClient.PolicyClient)
 }
 
 func (d *PolicyStatusDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
