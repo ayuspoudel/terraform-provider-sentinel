@@ -31,7 +31,9 @@ func (r *PolicyResource) Configure(ctx context.Context, req resource.ConfigureRe
 	if req.ProviderData == nil {
 		return
 	}
-	r.client = req.ProviderData.(*policyClient.PolicyClient)
+
+	data := req.ProviderData.(map[string]any)
+	r.client = data["policy"].(*policyClient.PolicyClient)
 }
 
 /*
