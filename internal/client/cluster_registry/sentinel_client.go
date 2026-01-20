@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -22,22 +23,50 @@ func NewClient(baseURL, token string) *Client {
 }
 
 func (c *Client) addHeaders(req *http.Request) {
-	req.Header.Set("Content-Type", "application/json")
 	if c.token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	}
 }
 
-func (c *Client) RegisterWithCredentials(ctx context.Context, req *clusterModel.RegisterWithCredentialsRequest) (*clusterModel.ClusterResponse, error) {
+/*
+Author: @ayuspoudel
+This struct & its methods are provider facing. Provider will provide
+attributes to these methods. It abstracts the core sentinel details
+like API endpoints, HTTP methods from provider.
+*/
+func (c *Client) RegisterWithCredentials(ctx context.Context, req *clusterModel.RegisterWithCredentialsPayload) (*clusterModel.ClusterResponse, error) {
 	apiEndpoint := c.baseURL + "/v1/clusters/register-with-credentials"
-	body, err := json.Marshal(req)
+
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	_ = writer.WriteField("name", req.ClusterName)
+
+	if req.Context != "" {
+		_ = writer.WriteField("context", req.Context)
+	}
+
+	part, err := writer.CreateFormFile("kubeconfig", "kubeconfig")
 	if err != nil {
 		return nil, err
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiEndpoint, bytes.NewBuffer(body))
+
+	_, err = part.Write(req.Kubeconfig)
 	if err != nil {
 		return nil, err
 	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiEndpoint, &body)
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq.Header.Set("Content-Type", writer.FormDataContentType())
 	c.addHeaders(httpReq)
 
 	response, err := c.http.Do(httpReq)
@@ -45,31 +74,35 @@ func (c *Client) RegisterWithCredentials(ctx context.Context, req *clusterModel.
 		return nil, err
 	}
 	defer response.Body.Close()
+
 	if response.StatusCode == http.StatusConflict {
 		return nil, fmt.Errorf("cluster already exists")
 	}
+
 	if response.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("failed to register cluster, status code: %d", response.StatusCode)
 	}
+
 	var cluster clusterModel.ClusterResponse
 	err = json.NewDecoder(response.Body).Decode(&cluster)
 	if err != nil {
 		return nil, err
 	}
+
 	return &cluster, nil
 }
 
 func (c *Client) GetCluster(ctx context.Context, name string) (*clusterModel.ClusterResponse, error) {
 	url := fmt.Sprintf("%s/v1/clusters/%s", c.baseURL, name)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	c.addHeaders(req)
+	c.addHeaders(httpReq)
 
-	resp, err := c.http.Do(req)
+	resp, err := c.http.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +117,8 @@ func (c *Client) GetCluster(ctx context.Context, name string) (*clusterModel.Clu
 	}
 
 	var out clusterModel.ClusterResponse
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+	err = json.NewDecoder(resp.Body).Decode(&out)
+	if err != nil {
 		return nil, err
 	}
 
@@ -94,14 +128,14 @@ func (c *Client) GetCluster(ctx context.Context, name string) (*clusterModel.Clu
 func (c *Client) DeleteCluster(ctx context.Context, name string) error {
 	url := fmt.Sprintf("%s/v1/clusters/%s", c.baseURL, name)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return err
 	}
 
-	c.addHeaders(req)
+	c.addHeaders(httpReq)
 
-	resp, err := c.http.Do(req)
+	resp, err := c.http.Do(httpReq)
 	if err != nil {
 		return err
 	}
