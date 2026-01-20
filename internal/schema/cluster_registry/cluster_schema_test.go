@@ -6,23 +6,48 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-func TestKubeconfigBlock_SubBlocksExist(t *testing.T) {
-	block := kubeconfigBlock()
+func TestClusterSchema_KubeconfigAttribute(t *testing.T) {
+	attrs := ClusterAttributes()
 
-	nested, ok := block.(schema.SingleNestedBlock)
+	attr, ok := attrs["kubeconfig"]
 	if !ok {
-		t.Fatalf("expected kubeconfig block to be SingleNestedBlock")
+		t.Fatalf("expected kubeconfig attribute to exist")
 	}
 
-	if _, ok := nested.Blocks["file"]; !ok {
-		t.Fatalf("expected kubeconfig.file block")
+	strAttr, ok := attr.(schema.StringAttribute)
+	if !ok {
+		t.Fatalf("expected kubeconfig to be StringAttribute")
 	}
 
-	if _, ok := nested.Blocks["env"]; !ok {
-		t.Fatalf("expected kubeconfig.env block")
+	if !strAttr.Required {
+		t.Fatalf("expected kubeconfig to be required")
 	}
 
-	if _, ok := nested.Blocks["s3"]; !ok {
-		t.Fatalf("expected kubeconfig.s3 block")
+	if !strAttr.Sensitive {
+		t.Fatalf("expected kubeconfig to be sensitive")
+	}
+}
+
+func TestClusterSchema_NoBlocks(t *testing.T) {
+	blocks := ClusterBlocks()
+
+	if len(blocks) != 0 {
+		t.Fatalf("expected no blocks in cluster schema")
+	}
+}
+
+func TestClusterSchema_ContextAttribute(t *testing.T) {
+	attrs := ClusterAttributes()
+
+	if _, ok := attrs["context"]; !ok {
+		t.Fatalf("expected context attribute")
+	}
+}
+
+func TestClusterSchema_NoLabelsAttribute(t *testing.T) {
+	attrs := ClusterAttributes()
+
+	if _, ok := attrs["labels"]; ok {
+		t.Fatalf("labels must not be configurable")
 	}
 }
