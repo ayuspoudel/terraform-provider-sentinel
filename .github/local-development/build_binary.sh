@@ -4,8 +4,8 @@
 
 
 set -euo pipefail
-
-echo "=== Sentinel Terraform Provider: Local Build Script ==="
+build_version="0.3.8"
+echo "=== Sentinel Terraform Provider: Local Build Script $build_version==="
 
 echo "1) Checking for package name consistency..."
 
@@ -51,7 +51,7 @@ file terraform-provider-sentinel
 
 echo
 echo "5) Installing binary into local Terraform plugin directory..."
-PLUGIN_DIR="$HOME/.terraform.d/plugins/registry.terraform.io/ayuspoudel/sentinel/0.0.0/$(go env GOOS)_$(go env GOARCH)"
+PLUGIN_DIR="$HOME/.terraform.d/plugins/registry.terraform.io/ayuspoudel/sentinel/0.3.8/$(go env GOOS)_$(go env GOARCH)"
 mkdir -p "$PLUGIN_DIR"
 cp terraform-provider-sentinel "$PLUGIN_DIR/"
 chmod +x "$PLUGIN_DIR/terraform-provider-sentinel"
@@ -65,7 +65,7 @@ terraform {
   required_providers {
     sentinel = {
       source  = "ayuspoudel/sentinel"
-      version = "0.2.0"
+      version = "0.3.8"
     }
   }
 }
@@ -78,7 +78,9 @@ EOF
 (
   cd "$TMP_DIR"
   terraform init -input=false
+  terraform plan
+
 )
 
 echo
-echo "SUCCESS: Provider builds and Terraform initializes correctly."
+echo "SUCCESS: Provider builds and Terraform initializes correctly with $build_version."
