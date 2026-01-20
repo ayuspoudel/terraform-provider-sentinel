@@ -7,6 +7,7 @@ import (
 	policyDatasource "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/datasource/policy_registry"
 
 	clusterResource "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/resource/cluster_registry"
+	kubeconfigSourceResource "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/resource/kubeconfig_source"
 	policyResource "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/resource/policy_registry"
 
 	clusterConfig "github.com/ayuspoudel/sentinel-sre/terraform-provider/internal/config/cluster_registry"
@@ -82,5 +83,6 @@ func (p *SentinelProvider) Resources(ctx context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		policyResource.NewPolicyResource,
 		clusterResource.NewClusterResource,
+		kubeconfigSourceResource.New,
 	}
 }
